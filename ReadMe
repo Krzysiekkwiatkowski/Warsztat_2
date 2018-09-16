@@ -1,0 +1,1 @@
+It's a project to practise integrating classes and database (MySQL). It should allow you to manage users, groups, solutions to exercises (add, edit, delete, show). It implements design pattern known as Active Record. It's still being worked on.
