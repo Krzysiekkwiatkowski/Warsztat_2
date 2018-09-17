@@ -1,14 +1,17 @@
 package pl.coderslab.Entity;
 
 import java.sql.*;
+import java.util.ArrayList;
 
 public class User {
 
     private static String SAVE_USER = "INSERT INTO users(username, email, password, user_group_id) VALUES (?,?,?,?)";
+    private static String EDIT_USER = "UPDATE users SET username = ?, email = ?, password = ? WHERE id = ?";
     private static String DELETE_USER = "DELETE FROM users WHERE id = ?";
     private static String LOAD_USER_BY_ID = "SELECT * FROM users WHERE id = ?";
+    private static String LOAD_ALL_USERS = "SELECT * FROM users";
 
-    private Long id;
+    private long id;
     private String username;
     private String email;
     private String password;
@@ -21,6 +24,9 @@ public class User {
         this.username = username;
         this.email = email;
         this.setPassword(password);
+    }
+    public long getId(){
+        return this.id;
     }
 
     public String getUsername() {
@@ -72,6 +78,13 @@ public class User {
             while (resultSet.next()){
                 this.id = resultSet.getLong(1);
             }
+        } else {
+            PreparedStatement preparedStatement = connection.prepareStatement(EDIT_USER);
+            preparedStatement.setString(1, this.username);
+            preparedStatement.setString(2, this.email);
+            preparedStatement.setString(3, password);
+            preparedStatement.setLong(4, this.id);
+            preparedStatement.executeUpdate();
         }
     }
 
@@ -84,7 +97,7 @@ public class User {
         }
     }
 
-    public User loadById(Connection connection, int id) throws SQLException {
+    public static User loadById(Connection connection, long id) throws SQLException {
         PreparedStatement preparedStatement = connection.prepareStatement(LOAD_USER_BY_ID);
         preparedStatement.setLong(1, id);
         ResultSet resultSet = preparedStatement.executeQuery();
@@ -102,7 +115,23 @@ public class User {
         return null;
     }
 
-    public User[] loadAll(Connection connection) throws SQLException {
-        return null;
+    public static User[] loadAll(Connection connection) throws SQLException {
+        ArrayList<User> users = new ArrayList<>();
+        PreparedStatement preparedStatement = connection.prepareStatement(LOAD_ALL_USERS);
+        ResultSet resultSet = preparedStatement.executeQuery();
+        while (resultSet.next()){
+            User loadedUser = new User();
+            loadedUser.id = resultSet.getLong("id");
+            loadedUser.username = resultSet.getString("username");
+            loadedUser.email = resultSet.getString("email");
+            loadedUser.password = resultSet.getString("password");
+            if(resultSet.getInt("user_group_id") != Types.NULL){
+                loadedUser.userGroupId = resultSet.getInt("user_group_id");
+            }
+            users.add(loadedUser);
+        }
+        User[] userTable = new User[users.size()];
+        userTable = users.toArray(userTable);
+        return userTable;
     }
 }
