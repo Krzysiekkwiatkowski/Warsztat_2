@@ -3,6 +3,7 @@ package pl.coderslab.Entity;
 import javax.jws.soap.SOAPBinding;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Scanner;
 
 public class User {
 
@@ -78,7 +79,7 @@ public class User {
             }
             preparedStatement.executeUpdate();
             ResultSet resultSet = preparedStatement.getGeneratedKeys();
-            while (resultSet.next()){
+            while (resultSet.next()) {
                 this.id = resultSet.getLong(1);
             }
         } else {
@@ -92,7 +93,7 @@ public class User {
     }
 
     public void delete(Connection connection) throws SQLException {
-        if(this.id != 0){
+        if (this.id != 0) {
             PreparedStatement preparedStatement = connection.prepareStatement(DELETE_USER);
             preparedStatement.setLong(1, this.id);
             preparedStatement.executeUpdate();
@@ -104,13 +105,13 @@ public class User {
         PreparedStatement preparedStatement = connection.prepareStatement(LOAD_USER_BY_ID);
         preparedStatement.setLong(1, id);
         ResultSet resultSet = preparedStatement.executeQuery();
-        while (resultSet.next()){
+        while (resultSet.next()) {
             User loadedUser = new User();
             loadedUser.id = resultSet.getLong("id");
             loadedUser.username = resultSet.getString("username");
             loadedUser.email = resultSet.getString("email");
             loadedUser.password = resultSet.getString("password");
-            if(resultSet.getInt("user_group_id") != Types.NULL){
+            if (resultSet.getInt("user_group_id") != Types.NULL) {
                 loadedUser.userGroupId = resultSet.getInt("user_group_id");
             }
             return loadedUser;
@@ -122,13 +123,13 @@ public class User {
         ArrayList<User> users = new ArrayList<>();
         PreparedStatement preparedStatement = connection.prepareStatement(LOAD_ALL_USERS);
         ResultSet resultSet = preparedStatement.executeQuery();
-        while (resultSet.next()){
+        while (resultSet.next()) {
             User loadedUser = new User();
             loadedUser.id = resultSet.getLong("id");
             loadedUser.username = resultSet.getString("username");
             loadedUser.email = resultSet.getString("email");
             loadedUser.password = resultSet.getString("password");
-            if(resultSet.getInt("user_group_id") != Types.NULL){
+            if (resultSet.getInt("user_group_id") != Types.NULL) {
                 loadedUser.userGroupId = resultSet.getInt("user_group_id");
             }
             users.add(loadedUser);
@@ -143,7 +144,7 @@ public class User {
         PreparedStatement preparedStatement = connection.prepareStatement(LOAD_ALL_USERS_BY_GROUP_ID);
         preparedStatement.setInt(1, id);
         ResultSet resultSet = preparedStatement.executeQuery();
-        while(resultSet.next()){
+        while (resultSet.next()) {
             User loadedUser = new User();
             loadedUser.id = resultSet.getLong("id");
             loadedUser.username = resultSet.getString("username");
@@ -155,5 +156,60 @@ public class User {
         User[] userTable = new User[groupUsers.size()];
         userTable = groupUsers.toArray(userTable);
         return userTable;
+    }
+
+    public static void showAll(Connection connection) throws SQLException {
+        User[] users = loadAll(connection);
+        for (User user : users) {
+            System.out.println(user.getId() + " - " + user.getUsername() + " - " + user.getEmail() + " - " + user.getPassword() + " - " + user.getUserGroup());
+        }
+    }
+
+    public static void main(String[] args) {
+        try (Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/warsztaty2?useSSL=false&characterEncoding=utf8", "root", "coderslab")) {
+            String option = "";
+            Scanner scanner = new Scanner(System.in);
+            Scanner scanner1 = new Scanner(System.in);
+            while (!option.equals("quit")) {
+                User.showAll(connection);
+                System.out.println("Wybierz jedną z opcji add, edit, delete, quit");
+                option = scanner.next();
+                if (option.equals("add")) {
+                    User user = new User();
+                    System.out.println("Podaj imie");
+                    user.username = scanner1.next();
+                    System.out.println("Podaj email");
+                    user.email = scanner1.next();
+                    System.out.println("Podaj hasło");
+                    user.password = scanner1.next();
+                    System.out.println("Podaj id grupy");
+                    user.userGroupId = scanner1.nextInt();
+                    user.saveToDB(connection);
+                }
+                if (option.equals("edit")) {
+                    System.out.println("Podaj id");
+                    long usersId = scanner1.nextLong();
+                    User user = User.loadById(connection, usersId);
+                    System.out.println("Podaj imie");
+                    user.username = scanner1.next();
+                    System.out.println("Podaj email");
+                    user.email = scanner1.next();
+                    System.out.println("Podaj hasło");
+                    user.password = scanner1.next();
+                    System.out.println("Podaj id grupy");
+                    user.userGroupId = scanner1.nextInt();
+                    user.saveToDB(connection);
+                }
+                if (option.equals("delete")) {
+                    System.out.println("Podaj id");
+                    long usersId = scanner1.nextLong();
+                    User user = User.loadById(connection, usersId);
+                    user.delete(connection);
+                    user.id = 0;
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 }
