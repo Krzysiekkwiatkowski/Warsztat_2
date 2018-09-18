@@ -12,6 +12,8 @@ public class Solution {
     private static String DELETE_SOLUTION = "DELETE FROM solution WHERE id = ?";
     private static String LOAD_SOLUTION_BY_ID = "SELECT * FROM solution WHERE id = ?";
     private static String LOAD_ALL_SOLUTIONS = "SELECT * FROM solution";
+    private static String LOAD_ALL_SOLUTIONS_BY_USER_ID = "SELECT * FROM solution WHERE users_id = ?";
+    private static String LOAD_ALL_SOLUTIONS_BY_EXERCISE_ID = "SELECT * FROM solution WHERE exercise_id = ?";
 
     private int id;
     private Date created;
@@ -165,6 +167,46 @@ public class Solution {
         }
         Solution[] solutionTable = new Solution[solutions.size()];
         solutionTable = solutions.toArray(solutionTable);
+        return solutionTable;
+    }
+
+    public static Solution[] loadAllByUserId(Connection connection, long id) throws SQLException {
+        ArrayList<Solution> userSolutions = new ArrayList<>();
+        PreparedStatement preparedStatement = connection.prepareStatement(LOAD_ALL_SOLUTIONS_BY_USER_ID);
+        preparedStatement.setLong(1, id);
+        ResultSet resultSet = preparedStatement.executeQuery();
+        while (resultSet.next()){
+            Solution loadedSolution = new Solution();
+            loadedSolution.id = resultSet.getInt("id");
+            loadedSolution.created = resultSet.getDate("created");
+            loadedSolution.updated = resultSet.getDate("updated");
+            loadedSolution.description = resultSet.getString("description");
+            loadedSolution.exercise_id = resultSet.getInt("exercise_id");
+            loadedSolution.user_id = resultSet.getInt("users_id");
+            userSolutions.add(loadedSolution);
+        }
+        Solution[] solutionTable = new Solution[userSolutions.size()];
+        solutionTable = userSolutions.toArray(solutionTable);
+        return solutionTable;
+    }
+
+    public static Solution[] loadAllByExerciseId(Connection connection, int id) throws SQLException {
+        ArrayList<Solution> exerciseSolutions = new ArrayList<>();
+        PreparedStatement preparedStatement = connection.prepareStatement(LOAD_ALL_SOLUTIONS_BY_EXERCISE_ID);
+        preparedStatement.setInt(1, id);
+        ResultSet resultSet = preparedStatement.executeQuery();
+        while (resultSet.next()){
+            Solution loadedSolution = new Solution();
+            loadedSolution.id = resultSet.getInt("id");
+            loadedSolution.created = resultSet.getDate("created");
+            loadedSolution.updated = resultSet.getDate("updated");
+            loadedSolution.description = resultSet.getString("description");
+            loadedSolution.exercise_id = resultSet.getInt("exercise_id");
+            loadedSolution.user_id = resultSet.getLong("users_id");
+            exerciseSolutions.add(loadedSolution);
+        }
+        Solution[] solutionTable = new Solution[exerciseSolutions.size()];
+        solutionTable = exerciseSolutions.toArray(solutionTable);
         return solutionTable;
     }
 }

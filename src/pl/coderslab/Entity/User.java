@@ -1,5 +1,6 @@
 package pl.coderslab.Entity;
 
+import javax.jws.soap.SOAPBinding;
 import java.sql.*;
 import java.util.ArrayList;
 
@@ -10,6 +11,7 @@ public class User {
     private static String DELETE_USER = "DELETE FROM users WHERE id = ?";
     private static String LOAD_USER_BY_ID = "SELECT * FROM users WHERE id = ?";
     private static String LOAD_ALL_USERS = "SELECT * FROM users";
+    private static String LOAD_ALL_USERS_BY_GROUP_ID = "SELECT * FROM users WHERE user_group_id = ?";
 
     private long id;
     private String username;
@@ -133,6 +135,25 @@ public class User {
         }
         User[] userTable = new User[users.size()];
         userTable = users.toArray(userTable);
+        return userTable;
+    }
+
+    public static User[] loadAllByGroupId(Connection connection, int id) throws SQLException {
+        ArrayList<User> groupUsers = new ArrayList<>();
+        PreparedStatement preparedStatement = connection.prepareStatement(LOAD_ALL_USERS_BY_GROUP_ID);
+        preparedStatement.setInt(1, id);
+        ResultSet resultSet = preparedStatement.executeQuery();
+        while(resultSet.next()){
+            User loadedUser = new User();
+            loadedUser.id = resultSet.getLong("id");
+            loadedUser.username = resultSet.getString("username");
+            loadedUser.email = resultSet.getString("email");
+            loadedUser.password = resultSet.getString("password");
+            loadedUser.userGroupId = resultSet.getInt("user_group_id");
+            groupUsers.add(loadedUser);
+        }
+        User[] userTable = new User[groupUsers.size()];
+        userTable = groupUsers.toArray(userTable);
         return userTable;
     }
 }
