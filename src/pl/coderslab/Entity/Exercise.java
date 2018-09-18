@@ -11,6 +11,7 @@ public class Exercise {
     private static String DELETE_EXERCISE = "DELETE FROM exercise WHERE id = ?";
     private static String LOAD_EXERCISE_BY_ID = "SELECT * FROM exercise WHERE id = ?";
     private static String LOAD_ALL_EXERCISES = "SELECT * FROM exercise";
+    private static String LOAD_ALL_EXERCISE_WITHOUT_SOLUTION = "select exercise.id, exercise.title, exercise.description, solution.description, solution.exercise_id, solution.users_id from solution join exercise on solution.exercise_id = exercise.id where users_id = ? AND solution.description is null";
 
     private int id;
     private String title;
@@ -151,5 +152,22 @@ public class Exercise {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    public static Exercise[] loadAllWithoutSolution(Connection connection, long id) throws SQLException {
+        ArrayList<Exercise> exercises = new ArrayList<>();
+        PreparedStatement preparedStatement = connection.prepareStatement(LOAD_ALL_EXERCISE_WITHOUT_SOLUTION);
+        preparedStatement.setLong(1, id);
+        ResultSet resultSet = preparedStatement.executeQuery();
+        while (resultSet.next()){
+            Exercise exercise = new Exercise();
+            exercise.id = resultSet.getInt("id");
+            exercise.title = resultSet.getString("title");
+            exercise.description = resultSet.getString("description");
+            exercises.add(exercise);
+        }
+        Exercise[] exercisesTable = new Exercise[exercises.size()];
+        exercisesTable = exercises.toArray(exercisesTable);
+        return exercisesTable;
     }
 }

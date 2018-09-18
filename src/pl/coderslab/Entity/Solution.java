@@ -12,6 +12,7 @@ public class Solution {
     private static String EDIT_SOLUTION = "UPDATE solution SET updated = ?, description = ?, exercise_id = ?, users_id = ? WHERE id = ?";
     private static String DELETE_SOLUTION = "DELETE FROM solution WHERE id = ?";
     private static String LOAD_SOLUTION_BY_ID = "SELECT * FROM solution WHERE id = ?";
+    private static String LOAD_SOLUTION_BY_EXERCISE_AND_USER_ID = "SELECT * FROM solution WHERE exercise_id = ? AND users_id = ?";
     private static String LOAD_ALL_SOLUTIONS = "SELECT * FROM solution";
     private static String LOAD_ALL_SOLUTIONS_BY_USER_ID = "SELECT * FROM solution WHERE users_id = ?";
     private static String LOAD_ALL_SOLUTIONS_BY_EXERCISE_ID = "SELECT * FROM solution WHERE exercise_id = ?";
@@ -256,5 +257,24 @@ public class Solution {
         } catch (SQLException e){
             e.printStackTrace();
         }
+    }
+
+    public static Solution loadByUserAndExerciseId(Connection connection, int exerciseId, long users_id) throws SQLException {
+        PreparedStatement preparedStatement = connection.prepareStatement(LOAD_SOLUTION_BY_EXERCISE_AND_USER_ID);
+        preparedStatement.setInt(1, exerciseId);
+        preparedStatement.setLong(2, users_id);
+        ResultSet resultSet = preparedStatement.executeQuery();
+        while (resultSet.next()){
+            Solution solution = new Solution();
+            solution.id = resultSet.getInt("id");
+            solution.created = resultSet.getDate("created");
+            if(resultSet.getDate("updated") != null) {
+                solution.updated = resultSet.getDate("updated");
+            }
+            solution.exercise_id = exerciseId;
+            solution.user_id = users_id;
+            return solution;
+        }
+        return null;
     }
 }
