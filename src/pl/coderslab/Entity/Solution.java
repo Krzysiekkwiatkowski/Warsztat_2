@@ -4,10 +4,11 @@ package pl.coderslab.Entity;
 import java.sql.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Scanner;
 
 public class Solution {
 
-    private static String SAVE_SOLUTION = "INSERT INTO solution (created, updated, description, exercise_id, users_id) VALUES (?,?,?,?,?)";
+    private static String SAVE_SOLUTION = "INSERT INTO solution (created, description, exercise_id, users_id) VALUES (?,?,?,?)";
     private static String EDIT_SOLUTION = "UPDATE solution SET updated = ?, description = ?, exercise_id = ?, users_id = ? WHERE id = ?";
     private static String DELETE_SOLUTION = "DELETE FROM solution WHERE id = ?";
     private static String LOAD_SOLUTION_BY_ID = "SELECT * FROM solution WHERE id = ?";
@@ -23,11 +24,11 @@ public class Solution {
     private long user_id;
 
     public Solution() {
+        this.created = Date.valueOf(LocalDate.now());
     }
 
     public Solution(String description) {
         this.created = Date.valueOf(LocalDate.now());
-        this.updated = Date.valueOf(LocalDate.now());
         this.description = description;
     }
 
@@ -80,18 +81,20 @@ public class Solution {
             String[] generatedColumns = {"ID"};
             PreparedStatement preparedStatement = connection.prepareStatement(SAVE_SOLUTION, generatedColumns);
             preparedStatement.setDate(1, Date.valueOf(this.created.toLocalDate()));
-            this.updated = Date.valueOf(LocalDate.now());
-            preparedStatement.setDate(2, this.updated);
-            preparedStatement.setString(3, this.description);
-            if(this.exercise_id != 0){
-                preparedStatement.setInt(4, this.exercise_id);
+            if(this.description != null) {
+                preparedStatement.setString(2, this.description);
             } else {
-                preparedStatement.setNull(4, Types.INTEGER);
+                preparedStatement.setNull(2, Types.VARCHAR);
+            }
+            if(this.exercise_id != 0){
+                preparedStatement.setInt(3, this.exercise_id);
+            } else {
+                preparedStatement.setNull(3, Types.INTEGER);
             }
             if(this.user_id != 0){
-                preparedStatement.setLong(5, this.user_id);
+                preparedStatement.setLong(4, this.user_id);
             } else {
-                preparedStatement.setNull(5, Types.INTEGER);
+                preparedStatement.setNull(4, Types.INTEGER);
             }
             preparedStatement.executeUpdate();
             ResultSet resultSet = preparedStatement.getGeneratedKeys();
@@ -101,7 +104,11 @@ public class Solution {
         } else {
             PreparedStatement preparedStatement = connection.prepareStatement(EDIT_SOLUTION);
             preparedStatement.setDate(1, Date.valueOf(LocalDate.now()));
-            preparedStatement.setString(2, this.description);
+            if (this.description != null) {
+                preparedStatement.setString(2, this.description);
+            } else {
+                preparedStatement.setNull(2, Types.VARCHAR);
+            }
             if(this.exercise_id != 0) {
                 preparedStatement.setInt(3, this.exercise_id);
             } else {
@@ -208,5 +215,46 @@ public class Solution {
         Solution[] solutionTable = new Solution[exerciseSolutions.size()];
         solutionTable = exerciseSolutions.toArray(solutionTable);
         return solutionTable;
+    }
+
+    public static void showAll(Connection connection) throws SQLException {
+        Solution[] solutions = Solution.loadAll(connection);
+        for (Solution solution : solutions) {
+            System.out.println(solution.getId() + " - " + solution.getCreated() + " - " + solution.getUpdated() + " - " + solution.getDescription() + " - " + solution.getExercise_id() + " - " + solution.getUser_id());
+        }
+    }
+
+    public static void main(String[] args) {
+        try(Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/warsztaty2?useSSL=false&characterEncoding=utf8", "root", "coderslab")){
+            String option = "";
+            Scanner scanner = new Scanner(System.in);
+            Scanner scanner1 = new Scanner(System.in);
+            while (!option.equals("quit")){
+                System.out.println("Wybierz jedną z opcji add, view, quit");
+                option = scanner.nextLine();
+                if(option.equals("add")){
+                    User.showAll(connection);
+                    System.out.println("Podaj id użytkownika");
+                    long userId = Long.valueOf(scanner.nextLine());
+                    Exercise.showAll(connection);
+                    System.out.println("Podaj id zadania");
+                    int exerciseId = Integer.parseInt(scanner1.nextLine());
+                    Solution solution = new Solution();
+                    solution.setExercise_id(exerciseId);
+                    solution.setUser_id(userId);
+                    solution.saveToDB(connection);
+                }
+                if(option.equals("view")){
+                    System.out.println("Podaj id użytkownika");
+                    long userId = Long.valueOf(scanner.nextLine());
+                    Solution[] solutions = loadAllByUserId(connection, userId);
+                    for (Solution solution : solutions) {
+                        System.out.println(solution.getCreated() + " - " + solution.getUpdated() + " - " + solution.getDescription() + " - " + solution.getExercise_id());
+                    }
+                }
+            }
+        } catch (SQLException e){
+            e.printStackTrace();
+        }
     }
 }
