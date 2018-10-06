@@ -1,9 +1,6 @@
 package pl.coderslab.App;
 
-import pl.coderslab.Entity.Exercise;
-import pl.coderslab.Entity.Group;
-import pl.coderslab.Entity.Solution;
-import pl.coderslab.Entity.User;
+import pl.coderslab.Entity.*;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -14,7 +11,7 @@ import java.util.Scanner;
 public class Main {
     public static void main(String[] args) {
 	    try(Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/warsztaty2?useSSL=false&characterEncoding=utf8", "root", "coderslab")){
-            String option = "";
+	        String option = "";
 	        Scanner scanner = new Scanner(System.in);
 	        Scanner scanner1 = new Scanner(System.in);
             System.out.println("Podaj swoje id");

@@ -11,6 +11,7 @@ public class AppInitializer {
     private static String CREATE_USER_GROUP ="CREATE TABLE user_group(id INT(11) AUTO_INCREMENT, name VARCHAR(255), PRIMARY KEY(id))";
     private static String CREATE_EXERCISE ="CREATE TABLE exercise(id INT(11) AUTO_INCREMENT, title VARCHAR(255), description TEXT, PRIMARY KEY(id))";
     private static String CREATE_SOLUTION ="CREATE TABLE solution(id INT(11) AUTO_INCREMENT, created DATETIME, updated DATETIME, description TEXT, exercise_id INT(11), users_id BIGINT(20), PRIMARY KEY(id), FOREIGN KEY (exercise_id) REFERENCES exercise(id), FOREIGN KEY (users_id) REFERENCES users(id))";
+    private static String CREATE_COMMENT ="CREATE TABLE comment(id INT(11) AUTO_INCREMENT, grade TINYINT, description TEXT, solution_id INT(11), PRIMARY KEY(id), FOREIGN KEY (solution_id) REFERENCES solution(id))";
 
     public static void main(String[] args) {
         try(Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/warsztaty2?useSSL=false&characterEncoding=utf8", "root", "coderslab")){
@@ -19,6 +20,7 @@ public class AppInitializer {
             statement.executeUpdate(CREATE_USERS);
             statement.executeUpdate(CREATE_EXERCISE);
             statement.executeUpdate(CREATE_SOLUTION);
+            statement.executeUpdate(CREATE_COMMENT);
         } catch (SQLException e){
             e.printStackTrace();
         }
