@@ -153,5 +153,4 @@ public class Skill {
             e.printStackTrace();
         }
     }
-
 }
