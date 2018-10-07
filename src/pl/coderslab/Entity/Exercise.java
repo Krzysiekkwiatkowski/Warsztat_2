@@ -116,7 +116,6 @@ public class Exercise {
             String option = "";
             Scanner scanner = new Scanner(System.in);
             Scanner scanner1 = new Scanner(System.in);
-            Scanner scanner2 = new Scanner(System.in);
             while (!option.equals("quit")) {
                 showAll(connection);
                 System.out.println("Wybierz jedną z opcji add, edit, delete, quit");
