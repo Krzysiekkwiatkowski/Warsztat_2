@@ -80,7 +80,7 @@ public class Skill_User {
         while (resultSet.next()){
             Skill_User skill_user = new Skill_User();
             skill_user.id = resultSet.getInt("id");
-            skill_user.skill_id = resultSet.getInt("skill_user");
+            skill_user.skill_id = resultSet.getInt("skill_id");
             skill_user.user_id = resultSet.getInt("user_id");
             return skill_user;
         }
