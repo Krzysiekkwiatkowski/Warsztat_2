@@ -226,7 +226,7 @@ public class Solution {
     }
 
     public static void main(String[] args) {
-        try(Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/warsztaty2?useSSL=false&characterEncoding=utf8", "root", "coderslab")){
+        try(Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/school?useSSL=false&characterEncoding=utf8", "root", "coderslab")){
             String option = "";
             Scanner scanner = new Scanner(System.in);
             Scanner scanner1 = new Scanner(System.in);
@@ -240,9 +240,12 @@ public class Solution {
                     Exercise.showAll(connection);
                     System.out.println("Podaj id zadania");
                     int exerciseId = Integer.parseInt(scanner1.nextLine());
+                    System.out.println("Podaj rozwiązanie");
+                    String description = scanner1.nextLine();
                     Solution solution = new Solution();
                     solution.setExercise_id(exerciseId);
                     solution.setUser_id(userId);
+                    solution.setDescription(description);
                     solution.saveToDB(connection);
                 }
                 if(option.equals("view")){
